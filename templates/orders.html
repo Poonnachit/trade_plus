@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="cupcake">
+
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>AI Finance</title>
+    <link rel="icon"
+          href="https://www.informatics.buu.ac.th/2020/wp-content/uploads/2018/04/cropped-logo-if-1-32x32.png"
+          sizes="32x32"/>
+    <link rel="icon"
+          href="https://www.informatics.buu.ac.th/2020/wp-content/uploads/2018/04/cropped-logo-if-1-192x192.png"
+          sizes="192x192"/>
+    <script src="https://code.jquery.com/jquery-3.7.1.js"
+            integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.3/dist/full.min.css" rel="stylesheet" type="text/css"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body>
+<dialog id="success" class="modal">
+    <div class="modal-box">
+        <div class="flex justify-center items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                 stroke="currentColor"
+                 class="w-40 h-40 text-success">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+            </svg>
+        </div>
+        <h3 class="font-bold text-4xl text-center">Success</h3>
+        <p class="py-4 text-center">
+            Cancelled order successfully
+        </p>
+        <div class="modal-action">
+            <form method="dialog">
+                <!-- if there is a button in form, it will close the modal -->
+                <button class="btn btn-primary">Close</button>
+            </form>
+        </div>
+    </div>
+</dialog>
+<dialog id="error_modal" class="modal">
+    <div class="modal-box">
+        <div class="flex justify-center items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                 stroke="currentColor" class="w-40 h-40 text-error">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+            </svg>
+        </div>
+        <h3 class="font-bold text-4xl text-center">Failed</h3>
+        <p class="py-4 text-center">
+            Failed to process your request
+        </p>
+        <div class="modal-action">
+            <form method="dialog">
+                <!-- if there is a button in form, it will close the modal -->
+                <button class="btn btn-primary">Close</button>
+            </form>
+        </div>
+    </div>
+</dialog>
+<div class="navbar bg-primary text-primary-content">
+    <a href="../" class="">
+        <button class="btn text-xl btn-ghost">Trade Plus+</button>
+    </a>
+</div>
+<div>
+    <h1 class="text-7xl font-semibold m-10 text-center">Order History</h1>
+    <div class=" p-5 rounded-lg">
+        <table id="table" class="table">
+            <thead>
+            <tr>
+                <th>Order No.</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Pos</th>
+                <th>Symbol</th>
+                <th>Side</th>
+                <th>Price</th>
+                <th>Volume</th>
+                <th>Matched</th>
+                <th>Balance</th>
+                <th>Cancelled</th>
+                <th>Valid</th>
+                <th>Status</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>{{order.orderNo}}</td>
+                <td>{{order.tradeDate[-2:]}}/{{order.tradeDate[-5:-3]}}</td>
+                <td>{{order.entryTime[-8:]}}</td>
+                <td>{{order.position}}</td>
+                <td>{{order.symbol}}</td>
+                <td>
+                    {% if order.side == "Long" %}
+                    <div class="badge badge-success gap-2">
+                        {{order.side}}
+                    </div>
+                    {% else %}
+                    <div class="badge badge-error gap-2">
+                        {{order.side}}
+                    </div>
+                    {% endif %}
+                </td>
+                <td>{{order.price}}</td>
+                <td>{{order.qty}}</td>
+                <td>{{order.matchQty}}</td>
+                <td>{{order.balanceQty}}</td>
+                <td>{{order.cancelQty}}</td>
+                <td>{{order.validity}}</td>
+                <td>
+
+                    {% if order.showStatus == "Cancelled(CS)" %}
+                    <div class="badge badge-error badge-outline gap-2">
+                        {{order.showStatus}}
+                    </div>
+                    {% else %}
+                    <div class="badge badge-outline">
+                        {{order.showStatus}}
+                    </div>
+                    {% endif %}
+                </td>
+                {% if order.showStatus != "Cancelled(CS)" %}
+                <td>
+                    <button class="btn" onclick="cancelOrder('{{order.orderNo}}')">Cancel</button>
+                </td>
+                {% else %}
+                <td></td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+    const success = document.getElementById('success')
+    const error_modal = document.getElementById('error_modal')
+    const cancelOrder = async (orderNo) => {
+        const response = await fetch(`http://127.0.0.1:8000/api/cancelOrder/${orderNo}`)
+            .then((response) => {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error(response.statusText);
+            })
+            .then((responseJson) => {
+                success.showModal()
+
+            })
+            .catch(() => {
+                error_modal.showModal()
+            });
+        window.reload()
+    }
+</script>
+</body>
+
+
+</html>

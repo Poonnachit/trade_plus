@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="cupcake">
+
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>AI Finance</title>
+    <link rel="icon"
+          href="https://www.informatics.buu.ac.th/2020/wp-content/uploads/2018/04/cropped-logo-if-1-32x32.png"
+          sizes="32x32"/>
+    <link rel="icon"
+          href="https://www.informatics.buu.ac.th/2020/wp-content/uploads/2018/04/cropped-logo-if-1-192x192.png"
+          sizes="192x192"/>
+    <script src="https://code.jquery.com/jquery-3.7.1.js"
+            integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.3/dist/full.min.css" rel="stylesheet" type="text/css"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body>
+<div class="diff aspect-[16/9]">
+    <div class="diff-item-1">
+        <div class="bg-primary text-primary-content text-9xl font-black grid place-content-center">
+            TRADE
+        </div>
+    </div>
+    <div class="diff-item-2">
+        <div class="bg-base-200 text-9xl font-black grid place-content-center">
+            + PLUS
+        </div>
+    </div>
+    <div class="diff-resizer"></div>
+</div>
+<div class="flex justify-center items-center h-screen w-screen gap-10">
+    <div class="my-24 flex justify-center items-center">
+        <div>
+            <h1 class="text-center text-7xl font-bold">
+                Artificial Intelligence<br> in Business and Finance
+            </h1>
+        </div>
+    </div>
+    <div class="bg-white p-10 shadow-xl rounded-xl">
+        <div class="flex justify-center items-center gap-2 h-full w-full ">
+            <div>
+                <h1 class="text-2xl text-center font-bold">
+                    Search Derivatives Symbol
+                </h1>
+                <input type="text" class="input input-bordered w-96 mt-4"
+                       placeholder="Search Derivatives Symbol" id="symbol">
+                <div class="text-error" id="missing">
+                </div>
+                <button class="btn btn-primary w-96 mt-2"
+                        onclick="submit()">Search
+                </button>
+                <div class="divider">OR</div>
+                <a href="./orders">
+                    <button class="btn btn-secondary w-96 mt-2">View Order History
+                    </button>
+                </a>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+<script>
+    const submit = () => {
+        const symbol = $("#symbol").val()
+        const missing = $("#missing")
+        if (!symbol) {
+            missing.text("please input some symbol")
+        } else {
+            window.location.href = `./dashboard/${symbol}`
+        }
+    }
+</script>
+</body>
+
+
+</html>

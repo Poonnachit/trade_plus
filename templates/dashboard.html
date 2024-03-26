@@ -1,0 +1,560 @@
+<!doctype html>
+<html lang="en" data-theme="cupcake">
+
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>AI Finance</title>
+    <link rel="icon"
+          href="https://www.informatics.buu.ac.th/2020/wp-content/uploads/2018/04/cropped-logo-if-1-32x32.png"
+          sizes="32x32"/>
+    <link rel="icon"
+          href="https://www.informatics.buu.ac.th/2020/wp-content/uploads/2018/04/cropped-logo-if-1-192x192.png"
+          sizes="192x192"/>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.3/dist/full.min.css" rel="stylesheet" type="text/css"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js"
+            integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/highcharts-more.js"></script>
+    <script src="https://code.highcharts.com/stock/highcharts-more.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/stock.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/stock/indicators/indicators-all.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/accessibility.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+</head>
+
+<body>
+<dialog id="success_buy" class="modal">
+    <div class="modal-box">
+        <div class="flex justify-center items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                 stroke="currentColor"
+                 class="w-40 h-40 text-success">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+            </svg>
+        </div>
+        <h3 class="font-bold text-4xl text-center">Success</h3>
+        <p class="py-4 text-center">
+            Buy {{ symbol }} success
+        </p>
+        <div class="modal-action">
+            <form method="dialog">
+                <!-- if there is a button in form, it will close the modal -->
+                <button class="btn btn-primary">Close</button>
+            </form>
+        </div>
+    </div>
+</dialog>
+<dialog id="success_sell" class="modal">
+    <div class="modal-box">
+        <div class="flex justify-center items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                 stroke="currentColor"
+                 class="w-40 h-40 text-success">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+            </svg>
+        </div>
+        <h3 class="font-bold text-4xl text-center">Success</h3>
+        <p class="py-4 text-center">
+            Sell {{ symbol }} success
+        </p>
+        <div class="modal-action">
+            <form method="dialog">
+                <!-- if there is a button in form, it will close the modal -->
+                <button class="btn btn-primary">Close</button>
+            </form>
+        </div>
+    </div>
+</dialog>
+<dialog id="error_modal" class="modal">
+    <div class="modal-box">
+        <div class="flex justify-center items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                 stroke="currentColor" class="w-40 h-40 text-error">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+            </svg>
+        </div>
+        <h3 class="font-bold text-4xl text-center">Failed</h3>
+        <p class="py-4 text-center">
+            Failed to process your request
+        </p>
+        <div class="modal-action">
+            <form method="dialog">
+                <!-- if there is a button in form, it will close the modal -->
+                <button class="btn btn-primary">Close</button>
+            </form>
+        </div>
+    </div>
+</dialog>
+
+<div class="navbar bg-primary text-primary-content">
+    <a href="../" class="">
+        <button class="btn text-xl btn-ghost">Trade Plus+</button>
+    </a>
+</div>
+<!--<div class="stat place-items-end">-->
+<!--    <div class="stat-title">Today Suggestion</div>-->
+<!--    <div class="stat-value text-error">-Sell Now</div>-->
+<!--    <div class="stat-desc">-->
+<!--        please use your own judgement-->
+<!--    </div>-->
+<!--</div>-->
+<!--<div class="stat place-items-end">-->
+<!--    <div class="stat-title">Today Suggestion</div>-->
+<!--    <div class="stat-value text-success">+Buy Now</div>-->
+<!--    <div class="stat-desc">-->
+<!--        please use your own judgement-->
+<!--    </div>-->
+<!--</div>-->
+<h1 class="mt-5 bg-gradient-to-r from-pink-500 to-yellow-500 bg-clip-text text-center text-9xl font-bold text-transparent">
+    {{ symbol }}
+</h1>
+<h2 class="m-5 text-center text-7xl font-semibold">
+    Derivatives Market Trends
+</h2>
+
+<div class="mx-10">
+    <div class="stats shadow w-full">
+        <div class="stat">
+            <div class="stat-figure text-success">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                     stroke="currentColor" class="inline-block w-8 h-8 stroke-current">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M2.25 6 9 12.75l4.286-4.286a11.948 11.948 0 0 1 4.306 6.43l.776 2.898m0 0 3.182-5.511m-3.182 5.51-5.511-3.181"/>
+                </svg>
+            </div>
+            <div class="stat-title">Minimum Price</div>
+            <div class="stat-value text-success" id="min">N/A</div>
+            <!--            <div class="stat-desc" id="minDesc">-->
+            <!--                asdfasdfasdfasdf asdfasdf-->
+            <!--            </div>-->
+        </div>
+
+        <div class="stat">
+            <div class="stat-figure text-error">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                     stroke="currentColor"
+                     class="inline-block w-8 h-8 stroke-current">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941"/>
+                </svg>
+
+            </div>
+            <div class="stat-title">Maximum Price</div>
+            <div class="stat-value text-error" id="max">N/A</div>
+            <!--            <div class="stat-desc">21% more than last month</div>-->
+        </div>
+        <div class="stat">
+            <div class="stat-figure text-info">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                     stroke="currentColor" class="inline-block w-8 h-8 stroke-current">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0 .5 1.5m-.5-1.5h-9.5m0 0-.5 1.5m.75-9 3-3 2.148 2.148A12.061 12.061 0 0 1 16.5 7.605"/>
+                </svg>
+
+            </div>
+            <div class="stat-title">Average Price</div>
+            <div class="stat-value text-info" id="avg">N/A</div>
+            <!--            <div class="stat-desc">21% more than last month</div>-->
+        </div>
+        <div class="stat">
+            <div class="stat-figure text-warning">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                     stroke="currentColor" class="inline-block w-8 h-8 stroke-current">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z"/>
+                </svg>
+            </div>
+            <div class="stat-title">Current Price</div>
+            <div class="stat-value text-warning" id="current"></div>
+            <div class="stat-desc">
+                Last updated: <span id="lastUpdated"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="m-5 grid grid-cols-3 gap-8">
+    <div id="historical_data" class="col-span-2 h-96 card shadow-xl"></div>
+    <div id="set50" class="col-span-1 card shadow-xl"></div>
+
+
+</div>
+<div class="m-5 grid grid-cols-3 gap-8">
+    <div id="sp_500" class="col-span-1 card shadow-xl"></div>
+
+    <div id="csi_300" class="col-span-1 card shadow-xl"></div>
+    <div id="ni_225" class="col-span-1 card shadow-xl"></div>
+
+</div>
+<div class="flex justify-center gap-4 items-center">
+    <label class="form-control w-96">
+        <div class="label">
+            <span class="label-text">
+                How many?
+            </span>
+        </div>
+        <input type="number" placeholder="Type here" class="input input-bordered w-full" id="number"/>
+        <div class="label">
+            <span class="label-text-alt text-error" id="missing"></span>
+        </div>
+    </label>
+</div>
+<div class="flex justify-center gap-4 items-center mb-8">
+    <button class="btn btn-success w-44"
+            onclick="buy()">
+        Buy
+    </button>
+    <button class="btn btn-error w-44"
+            onclick="sell()">
+        Sell
+    </button>
+
+</div>
+
+<script>
+    const symbol = "{{ symbol }}"
+    const error_modal = document.getElementById("error_modal");
+    const success_buy = document.getElementById("success_buy");
+    const success_sell = document.getElementById("success_sell");
+    const buy = () => {
+        const number = document.getElementById("number").value;
+        if (number === "") {
+            $("#missing").text("Please enter a number");
+            return;
+        }
+        const data = fetch(
+            `http://127.0.0.1:8000/api/buy/${symbol}/${number}`,
+        )
+            .then((response) => {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error(response.statusText);
+            })
+            .then((responseJson) => {
+                success_buy.showModal()
+
+            })
+            .catch(() => {
+                error_modal.showModal()
+            });
+
+    }
+
+    const sell = () => {
+        const number = document.getElementById("number").value;
+        if (number === "") {
+            $("#missing").text("Please enter a number");
+            return;
+        }
+        const data = fetch(
+            `http://127.0.0.1:8000/api/sell/${symbol}/${number}`,
+        )
+            .then((response) => {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error(response.statusText);
+            })
+            .then(() => {
+                success_sell.showModal()
+            })
+            .catch(() => {
+                error_modal.showModal()
+            });
+
+    }
+    const sp_500 = async () => {
+        const data = await fetch(`http://127.0.0.1:8000/api/sp_500_history`)
+        const json = await data.json();
+        const data2 = await fetch(`http://127.0.0.1:8000/api/sp_500_prediction`)
+        const json2 = await data2.json();
+        const chart = Highcharts.stockChart("sp_500", {
+            legend: {
+                layout: 'horizontal',
+                verticalAlign: 'top',
+                enabled: true
+            }, title: {
+                text: "S&P 500 Historical Data and Predictions",
+            },
+            xAxis: {
+                type: "datetime",
+            },
+            series: [
+                {
+                    name: "Open",
+                    data: json.map((i) => {
+                        const date = new Date(i.Date);
+                        return [Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()), i.Open]
+                    }),
+                    color: '#5DADE2'
+                },
+                {
+                    name: "Mean forecast",
+                    data: json2.map((i) => {
+                        const date = new Date(i.timestamp);
+                        return [Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()), i["mean"]]
+                    }),
+                    color: '#E67E22'
+                },
+                {
+                    name: "10%-90% confidence interval",
+                    data: json2.map((i) => {
+                        const date = new Date(i.timestamp);
+                        return [Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()), i["0.1"], i["0.9"]]
+                    }),
+                    type: 'areasplinerange',
+                    color: 'rgba(255, 165, 0, 0.2)'
+                }
+            ],
+        });
+    }
+    sp_500()
+
+    const set50 = async () => {
+
+        const data = await fetch(`http://127.0.0.1:8000/api/set50_history`)
+        const json = await data.json();
+
+        const data2 = await fetch(`http://127.0.0.1:8000/api/set50_prediction`)
+        const json2 = await data2.json();
+        const chart = Highcharts.stockChart("set50", {
+            legend: {
+                layout: 'horizontal',
+                verticalAlign: 'top',
+                enabled: true
+            },
+            title: {
+                text: "SET Historical Data and Predictions",
+            },
+            xAxis: {
+                type: "datetime",
+            },
+            series: [
+                {
+                    name: "Open",
+                    data: json.map((i) => {
+                        const date = new Date(i.Date);
+                        return [Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()), i.Open]
+                    }),
+                    color: '#5DADE2'
+                },
+                {
+                    name: "Mean forecast",
+                    data: json2.map((i) => {
+                        const date = new Date(i.timestamp);
+                        return [Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()), i["mean"]]
+                    }),
+                    color: '#E67E22'
+                },
+                {
+                    name: "10%-90% confidence interval",
+                    data: json2.map((i) => {
+                        const date = new Date(i.timestamp);
+                        return [Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()), i["0.1"], i["0.9"]]
+                    }),
+                    type: 'areasplinerange',
+                    color: 'rgba(255, 165, 0, 0.2)'
+                }
+            ],
+        });
+    }
+    set50()
+
+    const csi300 = async () => {
+        const data = await fetch(`http://127.0.0.1:8000/api/csi300_history`)
+        const json = await data.json();
+
+        const data2 = await fetch(`http://127.0.0.1:8000/api/csi300_prediction`)
+        const json2 = await data2.json();
+        const chart = Highcharts.stockChart("csi_300", {
+            legend: {
+                layout: 'horizontal',
+                verticalAlign: 'top',
+                enabled: true
+            }, title: {
+                text: "CSI300 Historical Data and Predictions",
+            },
+            xAxis: {
+                type: "datetime",
+            },
+            series: [
+                {
+                    name: "Open",
+                    data: json.map((i) => {
+                        const date = new Date(i.Date);
+                        return [Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()), i.Open]
+                    }),
+                    color: '#5DADE2'
+                },
+                {
+                    name: "Mean forecast",
+                    data: json2.map((i) => {
+                        const date = new Date(i.timestamp);
+                        return [Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()), i["mean"]]
+                    }),
+                    color: '#E67E22'
+                },
+                {
+                    name: "10%-90% confidence interval",
+                    data: json2.map((i) => {
+                        const date = new Date(i.timestamp);
+                        return [Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()), i["0.1"], i["0.9"]]
+                    }),
+                    type: 'areasplinerange',
+                    color: 'rgba(255, 165, 0, 0.2)'
+                }
+            ],
+        });
+    }
+    csi300()
+
+    const ni225 = async () => {
+        const data = await fetch(`http://127.0.0.1:8000/api/ni225_history`)
+        const json = await data.json();
+
+        const data2 = await fetch(`http://127.0.0.1:8000/api/ni225_prediction`)
+        const json2 = await data2.json();
+        const chart = Highcharts.stockChart("ni_225", {
+            legend: {
+                layout: 'horizontal',
+                verticalAlign: 'top',
+                enabled: true
+            }, title: {
+                text: "NI225 Historical Data and Predictions",
+            },
+            xAxis: {
+                type: "datetime",
+            },
+            series: [
+                {
+                    name: "Open",
+                    data: json.map((i) => {
+                        const date = new Date(i.Date);
+                        return [Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()), i.Open]
+                    }),
+                    color: '#5DADE2'
+                },
+                {
+                    name: "Prediction",
+                    data: json2.map((i) => {
+                        const date = new Date(i.timestamp);
+                        return [Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()), i["mean"]]
+                    }),
+                    color: '#E67E22'
+                },
+                {
+                    name: "10%-90% confidence interval",
+                    data: json2.map((i) => {
+                        const date = new Date(i.timestamp);
+                        return [Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()), i["0.1"], i["0.9"]]
+                    }),
+                    type: 'areasplinerange',
+                    color: 'rgba(255, 165, 0, 0.2)'
+                }
+            ],
+        });
+    }
+    ni225()
+
+    const chart2 = Highcharts.stockChart("historical_data", {
+        legend: {
+            layout: 'horizontal',
+            verticalAlign: 'top',
+            enabled: true
+        }, chart: {
+            type: "candlestick",
+        },
+        title: {
+            text: "{{ symbol }} Historical Data",
+        },
+        plotOptions: {
+            candlestick: {
+                color: 'pink',
+                lineColor: 'red',
+                upColor: 'lightgreen',
+                upLineColor: 'green',
+            }
+        },
+        series: [
+            {
+                name: `${symbol}`,
+                id: `${symbol}`,
+                data: []
+            }, {
+                type: 'pc',
+                id: 'overlay',
+                linkedTo: `${symbol}`,
+                yAxis: 0
+            }
+
+        ],
+    });
+
+    const get_container1_data = async () => {
+        const current = $("#current");
+        const data = await fetch(
+            `http://127.0.0.1:8000/api/current_quote/${symbol}`,
+        );
+        const currentQuote = await data.json();
+        const currentPrice = currentQuote.price;
+        $("#lastUpdated").text(new Date().toLocaleTimeString());
+        if (!currentPrice) {
+            current.text("N/A");
+            return;
+        }
+        current.text(currentPrice);
+    }
+
+    from_unix_time_to_date = (unix_time) => {
+        const date = new Date(unix_time * 1000);
+        const year = date.getFullYear();
+        const month = date.getMonth();
+        const day = date.getDate();
+
+        return Date.UTC(year, month, day);
+    }
+    const get_container2_data = async () => {
+        const start = new Date();
+        start.setFullYear(start.getFullYear() - 5)
+        const end = new Date();
+        const start_format = start.toISOString().split(".")[0];
+        const end_format = end.toISOString().split(".")[0];
+        const data = await fetch(
+            `/api/candlestick/${symbol}/1d/${start_format}/${end_format}`,
+        );
+        const json = await data.json();
+
+        const formattedData = json['time'].map((i, index) => {
+
+            return [from_unix_time_to_date(i), json['open'][index], json['high'][index], json['low'][index], json['close'][index]]
+
+        })
+        const series = chart2.series[0];
+
+
+        series.setData(formattedData)
+        $("#min").text(Math.min(...json['low']).toFixed(2));
+
+        $("#max").text(Math.max(...json['high']).toFixed(2));
+        $("#avg").text((json['close'].reduce((a, b) => a + b, 0) / json['close'].length).toFixed(2));
+    }
+    get_container2_data();
+
+    $(document).ready(() => {
+        get_container1_data();
+        setInterval(async () => {
+            await get_container1_data();
+        }, 1000);
+    });
+</script>
+</body>
+
+</html>
